@@ -4,6 +4,7 @@
 #include <autoware_msgs/Lane.h>
 #include <autoware_msgs/LaneArray.h>
 #include <ros/ros.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_datatypes.h>
 #include <dynamic_reconfigure/server.h>
 #include <bezier_replanner/bezierReplannerConfig.h>
@@ -14,6 +15,7 @@ public:
 private:
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
+  ros::Publisher replan_mark_pub_;
   ros::Publisher lane_pub_;
   ros::Subscriber lane_sub_;
   bool replanning_mode_;

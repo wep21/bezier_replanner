@@ -56,13 +56,12 @@ double CubicBezier::getYaw(double t) {
 
 Eigen::MatrixXd CubicBezier::getPath() {
   Eigen::VectorXd t_list = Eigen::VectorXd::LinSpaced(resampling_num + 1, 0, 1);
-  Eigen::MatrixXd path = Eigen::MatrixXd::Zero(resampling_num, 4);
+  Eigen::MatrixXd path = Eigen::MatrixXd::Zero(resampling_num + 1, 4);
   for (int i = 0; i < resampling_num + 1; i++) {
     path(i, 0) = getX(t_list[i]);
     path(i, 1) = getY(t_list[i]);
     path(i, 2) = getZ(t_list[i]);
     path(i, 3) = getYaw(t_list[i]);
   }
-
   return path;
 }

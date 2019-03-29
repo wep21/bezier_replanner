@@ -3,14 +3,18 @@
 
 BezierReplannerNode::BezierReplannerNode()
     : private_nh_("~"), replanning_mode_(false) {
-  private_nh_.param<std::string>("srcLane", src_lane_, "/based/lane_waypoints_raw");
-  private_nh_.param<std::string>("dstLane", dst_lane_,
+  private_nh_.param<std::string>("src_lane", src_lane_, "/based/lane_waypoints_raw");
+  private_nh_.param<std::string>("dst_lane", dst_lane_,
                             "/based/lane_waypoints_array");
   private_nh_.param<int>("step", step_, 5);
   private_nh_.param<int>("resampling_num", resampling_num_, 10);
   lane_pub_ = nh_.advertise<autoware_msgs::LaneArray>(dst_lane_, 10, true);
   lane_sub_ =
       nh_.subscribe(src_lane_, 1, &BezierReplannerNode::laneCallback, this);
+  // set dynamic reconfigure
+  dynamic_reconfigure::Server<bezier_replanner::bezierReplannerConfig>::CallbackType cb;
+  cb = boost::bind(&BezierReplannerNode::configCallback, this, _1, _2);
+  server.setCallback(cb);
 }
 BezierReplannerNode::~BezierReplannerNode() {}
 
@@ -21,23 +25,14 @@ void BezierReplannerNode::replan(autoware_msgs::LaneArray &lane_array) {
 }
 
 void BezierReplannerNode::configCallback(bezier_replanner::bezierReplannerConfig &config, uint32_t level){
-    src_lane_ = config.srcLane;
-    dst_lane_ = config.dstLane;
+    src_lane_ = config.src_lane;
+    dst_lane_ = config.dst_lane;
     step_ = config.step;
     resampling_num_ = config.resampling_num;
-    ROS_INFO("resampling: %i", resampling_num_);
     replanning_mode_ = config.replanning_mode;
-    if(replanning_mode_){
-      publishLaneArray();
-    }
-}
-
-void BezierReplannerNode::setupDynamicReconfigure()
-{
-    // set dynamic reconfigure
-    dynamic_reconfigure::Server<bezier_replanner::bezierReplannerConfig>::CallbackType cb;
-    cb = boost::bind(&BezierReplannerNode::configCallback, this, _1, _2);
-    server.setCallback(cb);
+    lane_pub_ = nh_.advertise<autoware_msgs::LaneArray>(dst_lane_, 10, true);
+    lane_sub_ = nh_.subscribe(src_lane_, 1, &BezierReplannerNode::laneCallback, this);
+    publishLaneArray();
 }
 
 
@@ -137,15 +132,14 @@ autoware_msgs::Lane BezierReplannerNode::bezierReplan(const autoware_msgs::Lane 
     Eigen::Vector3d p4(step_point(i+1, 0), step_point(i+1, 1), step_point(i+1, 2));
     CubicBezier bezier(p1, p2, p3, p4, resampling_num);
     Eigen::MatrixXd path = bezier.getPath();
-    for (int j = 0; j < path.rows(); j++){
+    for (int j = 0; j < path.rows() ; j++){
         autoware_msgs::Waypoint wp;
-        wp.pose.pose.position.x = path(0, j);
-        wp.pose.pose.position.y = path(1, j);
-        wp.pose.pose.position.z = path(2, j);
-        wp.pose.pose.orientation = tf::createQuaternionMsgFromYaw(path(3, j));
+        wp.pose.pose.position.x = path(j, 0);
+        wp.pose.pose.position.y = path(j, 1);
+        wp.pose.pose.position.z = path(j, 2);
+        wp.pose.pose.orientation = tf::createQuaternionMsgFromYaw(path(j, 3));
         Eigen::RowVectorXd point(3);
-        Eigen::MatrixXd X = Eigen::MatrixXd::Random(10, 3);
-        point << path(0, j), path(1, j), path(2, j);
+        point << path(j, 0), path(j, 1), path(j, 2);
         Eigen::MatrixXd::Index index;
         (waypoint.block(step_point_idx(i), 0, step_point_idx(i+1) - step_point_idx(i) + 1, 3).rowwise() - point).rowwise().squaredNorm().minCoeff(&index);
         wp.twist.twist.linear.x = waypoint.block(step_point_idx(i), 0, step_point_idx(i+1) - step_point_idx(i) + 1, 5)(index, 3);
