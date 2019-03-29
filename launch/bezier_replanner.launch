@@ -1,0 +1,15 @@
+<launch>
+    <arg name="step" default="5"/>
+    <arg name="resampling_num" default="6"/>
+    <arg name="src_lane" default="/based/lane_waypoints_raw"/>
+    <arg name="dst_lane" default="/based/lane_waypoints_array"/>
+    <arg name="replanning_mode" default="True"/>
+	
+    <node pkg="bezier_replanner" name="bezier_replanner_node" type="bezier_replanner" output="screen">
+        <param name="step" value="$(arg step)"/>
+        <param name="resampling_num" value="$(arg resampling_num)"/>
+        <param name="src_lane" value="$(arg src_lane)"/>
+        <param name="dst_lane" value="$(arg dst_lane)"/>
+        <param name="replanning_mode" value="$(arg replanning_mode)"/>
+    </node>
+</launch>
