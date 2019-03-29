@@ -20,6 +20,27 @@ void BezierReplannerNode::replan(autoware_msgs::LaneArray &lane_array) {
   }
 }
 
+void BezierReplannerNode::configCallback(bezier_replanner::bezierReplannerConfig &config, uint32_t level){
+    src_lane_ = config.srcLane;
+    dst_lane_ = config.dstLane;
+    step_ = config.step;
+    resampling_num_ = config.resampling_num;
+    ROS_INFO("resampling: %i", resampling_num_);
+    replanning_mode_ = config.replanning_mode;
+    if(replanning_mode_){
+      publishLaneArray();
+    }
+}
+
+void BezierReplannerNode::setupDynamicReconfigure()
+{
+    // set dynamic reconfigure
+    dynamic_reconfigure::Server<bezier_replanner::bezierReplannerConfig>::CallbackType cb;
+    cb = boost::bind(&BezierReplannerNode::configCallback, this, _1, _2);
+    server.setCallback(cb);
+}
+
+
 void BezierReplannerNode::publishLaneArray() {
   autoware_msgs::LaneArray array(lane_array_);
   if (replanning_mode_) {
