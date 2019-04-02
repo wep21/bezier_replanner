@@ -47,8 +47,3 @@ target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 install(TARGETS ${PROJECT_NAME}_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-catkin_install_python(
-  PROGRAMS scripts/panel
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)

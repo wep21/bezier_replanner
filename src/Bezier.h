@@ -27,21 +27,21 @@ double CubicBezier::getX(double t) {
   return (1 - t) * (1 - t) * (1 - t) * start_point[0] +
          3 * (1 - t) * (1 - t) * t * start_control_point[0] +
          3 * (1 - t) * t * t * end_control_point[0] +
-         t * t * t * end_control_point[0];
+         t * t * t * end_point[0];
 }
 
 double CubicBezier::getY(double t) {
   return (1 - t) * (1 - t) * (1 - t) * start_point[1] +
          3 * (1 - t) * (1 - t) * t * start_control_point[1] +
          3 * (1 - t) * t * t * end_control_point[1] +
-         t * t * t * end_control_point[1];
+         t * t * t * end_point[1];
 }
 
 double CubicBezier::getZ(double t) {
   return (1 - t) * (1 - t) * (1 - t) * start_point[2] +
          3 * (1 - t) * (1 - t) * t * start_control_point[2] +
          3 * (1 - t) * t * t * end_control_point[2] +
-         t * t * t * end_control_point[2];
+         t * t * t * end_point[2];
 }
 
 double CubicBezier::getYaw(double t) {
